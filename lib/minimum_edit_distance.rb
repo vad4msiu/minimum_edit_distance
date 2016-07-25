@@ -24,30 +24,70 @@ class MinimumEditDistance
     @str_2 = str_2
   end
 
-  def resolve
+  def minimal_edits
+    return edits unless edits.nil?
+
     fill_matrix
-    print_minimal_edits
+    fill_edits
+
+    edits.reverse
   end
-
-  private
-
-  attr_reader :str_1, :str_2
 
   def print_minimal_edits
     line = 1
 
     minimal_edits.each do |item|
-      action_chars = ACTION_CHARS[item[:action]]
       chars = case item[:action]
-      when ACTION_REPLACE;       "#{ item[:char_1] }|#{ item[:char_2]}"
-      when ACTION_EQUAL_REPLACE; "#{ item[:char_1] }"
-      when ACTION_DELETE;        "#{ item[:char_1] }"
-      when ACTION_ADD;           "#{ item[:char_2] }"
+      when ACTION_REPLACE
+        "#{ item[:char_1] }|#{ item[:char_2]}"
+      when ACTION_EQUAL_REPLACE, ACTION_DELETE, ACTION_ADD
+        "#{ item[:char] }"
       end
 
-      print "#{ line } #{ action_chars } #{ chars }\n"
+      print "#{ line } #{ ACTION_CHARS[item[:action]] } #{ chars }\n"
 
       line += 1
+    end
+  end
+
+  private
+
+  attr_reader :str_1, :str_2
+  attr_accessor :edits
+
+  def fill_edits
+    self.edits = []
+
+    i = row_size - 1
+    j = column_size - 1
+
+    return [] if i.zero? && j.zero?
+
+    begin
+      begin
+        action = action_name(i, j)
+        i, j = index_step_for_action(action, i, j)
+        item_edit = item_edit_for(action, i, j)
+        edits.push(item_edit)
+      end while j != 0
+    end while i != 0
+  end
+
+  def item_edit_for(action, i, j)
+    case action
+    when ACTION_DELETE
+      { action: action, char: str_1[i] }
+    when ACTION_EQUAL_REPLACE
+      { action: action, char: str_1[i] }
+    when ACTION_ADD
+      { action: action, char: str_2[j] }
+    when ACTION_REPLACE
+      { action: action, char_1: str_1[i], char_2: str_2[j] }
+    else
+      raise(
+        StandardError,
+        "Can not detirmenate item_edit for action=#{ action } i=#{ i }, j=#{ j }"
+      )
     end
   end
 
@@ -105,30 +145,7 @@ class MinimumEditDistance
     end
   end
 
-  def minimal_edits
-    edits = []
-
-    i = row_size - 1
-    j = column_size - 1
-
-    return [] if i.zero? && j.zero?
-
-    begin
-      begin
-        action = action_name(i, j)
-        i, j = step_for_action(action, i, j)
-        edits.push(
-          action: action,
-          char_1: str_1[i],
-          char_2: str_2[j]
-        )
-      end while j != 0
-    end while i != 0
-
-    edits.reverse
-  end
-
-  def step_for_action(action, i, j)
+  def index_step_for_action(action, i, j)
     case action
     when ACTION_DELETE
       i -=1

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe MinimumEditDistance do
-  describe "#resolve" do
+  describe "#print_minimal_edits" do
     let(:minimum_edit_distance) { MinimumEditDistance.new(file_1, file_2) }
 
-    subject { minimum_edit_distance.resolve }
+    subject { minimum_edit_distance.print_minimal_edits }
 
     shared_examples "correct solution" do
       it 'returns the correct solution' do
