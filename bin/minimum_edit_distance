@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "minimum_edit_distance"
+
+file_1 = File.read(ARGV[0]).split("\n")
+file_2 = File.read(ARGV[1]).split("\n")
+
+algorithm = MinimumEditDistance.new(file_1, file_2)
+algorithm.resolve
