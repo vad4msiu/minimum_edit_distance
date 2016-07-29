@@ -25,12 +25,12 @@ class MinimumEditDistance
   end
 
   def minimal_edits
-    return edits unless edits.nil?
+    @minimal_edits ||= begin
+      fill_matrix
+      fill_edits
 
-    fill_matrix
-    fill_edits
-
-    edits.reverse
+      edits.reverse
+    end
   end
 
   def print_minimal_edits
